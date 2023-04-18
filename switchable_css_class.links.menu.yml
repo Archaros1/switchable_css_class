@@ -1,0 +1,11 @@
+entity.css_class_type.collection:
+  title: 'CSS Class types'
+  description: 'Manage and CRUD actions on CSS Class type.'
+  parent: system.admin_structure
+  route_name: entity.css_class_type.collection
+
+css_class.type_add:
+  title: 'Ajouter une catégorie de classe CSS'
+  route_name: entity.css_class_type.add_form
+  parent: entity.css_class_type.collection
+  weight: -50

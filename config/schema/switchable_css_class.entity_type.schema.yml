@@ -1,0 +1,15 @@
+switchable_css_classes.css_class_type.*:
+  type: config_entity
+  label: 'CSS Class type config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    class:
+      type: string
+      label: 'Classe CSS'
+    uuid:
+      type: string

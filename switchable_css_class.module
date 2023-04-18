@@ -1,0 +1,97 @@
+<?php
+
+use Drupal\field\Entity\FieldConfig;
+
+/**
+* Implements hook_form_FORM_ID_alter().
+*/
+function switchable_css_classes_form_css_class_column_add_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+
+  $entityManager = \Drupal::entityTypeManager();
+
+  $currentUserRoles = \Drupal::currentUser()->getRoles();
+  $userIsAdmin = FALSE;
+  foreach ($currentUserRoles as $key => $roleId) {
+    $role = $entityManager->getStorage('user_role')->load($roleId);
+    if ($role->isAdmin()) {
+      $userIsAdmin = TRUE;
+      break;
+    }
+  }
+
+  if (!$userIsAdmin) {
+    unset($form['created']);
+    unset($form['uid']);
+  }
+}
+
+/**
+* Implements hook_preprocess_HOOK().
+*/
+function switchable_css_classes_preprocess_paragraph(&$variables) {
+
+  $entityManager = \Drupal::entityTypeManager();
+  $paragraph = $variables['paragraph'];
+  foreach ($paragraph->getFieldDefinitions() as $fieldName => $fieldConfig) {
+    if ($fieldConfig instanceof FieldConfig && $fieldConfig->getSetting('target_type') === 'css_class') {
+      if (array_key_exists($fieldName, $variables['elements']) && array_key_exists('#items', $variables['elements'][$fieldName])) {
+        foreach ($variables['elements'][$fieldName]['#items'] as $item) {
+          $classId = $item->get('target_id')->getValue();
+          $class = $entityManager->getStorage('css_class')->load($classId);
+          $variables['elements'][$fieldName]['classes'][] = $class->get('class')->getValue()[0]['value'];
+        }
+      }
+    }
+  }
+}
+
+/**
+* Implements hook_preprocess_HOOK().
+*/
+function switchable_css_classes_preprocess_select(&$variables) {
+
+  if (array_key_exists('#bundle', $variables['element'])) {
+    $parentBundle = $variables['element']['#bundle'];
+
+    $entityFieldManager = \Drupal::service('entity_field.manager');
+    $fields = $entityFieldManager->getFieldDefinitions('paragraph', $parentBundle);
+    $fieldData = array_key_exists('#field_name', $variables['element']) ? $fields[$variables['element']['#field_name']] ?? NULL : NULL;
+
+    if (!is_null($fieldData) && $fieldData->getSetting('target_type') === 'css_class') {
+      $variables['options'] = filterCssClassOptions($variables['options'], $parentBundle);
+    }
+  }
+}
+
+function filterCssClassOptions(array $options, string $parentBundle)
+{
+  $entityManager = \Drupal::entityTypeManager();
+  $res = [];
+  foreach ($options as $key => $option) {
+    if ($option['type'] === 'optgroup') {
+      $optgroup = filterCssClassOptions($option['options'], $parentBundle);
+      if (!empty($optgroup)) {
+        $res[$key] = $option;
+        $res[$key]['options'] = $optgroup;
+      }
+    }
+    else {
+      $class = $entityManager->getStorage('css_class')->load($option['value']);
+      if (!empty($class)) {
+        if (!empty($class->get('allowed_types')->getValue())) {
+          $allowedParagTypes = array_map(function ($elem) {
+            return $elem['target_id'];
+          }, $class->get('allowed_types')->getValue());
+          if (in_array($parentBundle, $allowedParagTypes)) {
+            $res[$key] = $option;
+          }
+        }
+        else {
+          $res[$key] = $option;
+        }
+      }
+    }
+  }
+
+  return $res;
+}

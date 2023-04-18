@@ -1,0 +1,12 @@
+administer css class types:
+  title: 'Administer css class types'
+  description: 'Maintain the types of css class entity.'
+  restrict access: true
+delete css class:
+  title: Delete css class
+create css class:
+  title: Create css class
+view css class:
+  title: View css class
+edit css class:
+  title: Edit css class

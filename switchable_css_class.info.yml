@@ -1,0 +1,5 @@
+name: 'Switchable CSS Class'
+type: module
+description: 'Introduit les entités CSS Class'
+core_version_requirement: ^9 || ^10
+package: 'Custom'

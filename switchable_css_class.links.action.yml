@@ -1,0 +1,11 @@
+css_class.type_add:
+  title: 'Add css class type'
+  route_name: entity.css_class_type.add_form
+  appears_on:
+    - entity.css_class_type.collection
+
+css_class.add_page:
+  title: 'Add css class'
+  route_name: entity.css_class.add_page
+  appears_on:
+    - entity.css_class.collection
